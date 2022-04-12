@@ -1,0 +1,147 @@
+
+CREATE TABLE Notown.Instrument (
+                Name VARCHAR NOT NULL,
+                Pitch VARCHAR NOT NULL,
+                CONSTRAINT name PRIMARY KEY (Name)
+);
+
+
+CREATE TABLE Notown.Address (
+                AddressID INTEGER NOT NULL,
+                Number INTEGER NOT NULL,
+                Street1 VARCHAR NOT NULL,
+                Street2 VARCHAR NOT NULL,
+                City VARCHAR NOT NULL,
+                State VARCHAR NOT NULL,
+                Zip_Code VARCHAR NOT NULL,
+                Telephone INTEGER NOT NULL,
+                CONSTRAINT addressid PRIMARY KEY (AddressID)
+);
+
+
+CREATE TABLE Notown.Musician (
+                SSN INTEGER NOT NULL,
+                AddressID INTEGER NOT NULL,
+                Name VARCHAR NOT NULL,
+                CONSTRAINT ssn PRIMARY KEY (SSN, AddressID)
+);
+
+
+CREATE SEQUENCE Notown.album_age_seq;
+
+CREATE TABLE Notown.Album (
+                AlbumID INTEGER NOT NULL,
+                SSN INTEGER NOT NULL,
+                AddressID INTEGER NOT NULL,
+                Title VARCHAR NOT NULL,
+                Release_Date VARCHAR NOT NULL,
+                Format VARCHAR NOT NULL,
+                Age INTEGER NOT NULL DEFAULT nextval('Notown.album_age_seq'),
+                CONSTRAINT albumid PRIMARY KEY (AlbumID, SSN, AddressID, Title)
+);
+
+
+ALTER SEQUENCE Notown.album_age_seq OWNED BY Notown.Album.Age;
+
+CREATE TABLE Notown.Song (
+                Title VARCHAR NOT NULL,
+                SSN INTEGER NOT NULL,
+                AddressID INTEGER NOT NULL,
+                AlbumID INTEGER NOT NULL,
+                Length VARCHAR NOT NULL,
+                CONSTRAINT title PRIMARY KEY (Title, SSN, AddressID, AlbumID)
+);
+
+
+CREATE TABLE Notown.Song_Musician (
+                SSN INTEGER NOT NULL,
+                AddressID INTEGER NOT NULL,
+                Title VARCHAR NOT NULL,
+                CONSTRAINT title PRIMARY KEY (SSN, AddressID, Title)
+);
+
+
+CREATE TABLE Notown.Instrument_Song (
+                Name VARCHAR NOT NULL,
+                Title VARCHAR NOT NULL,
+                CONSTRAINT title PRIMARY KEY (Name, Title)
+);
+
+
+CREATE TABLE Notown.Musician_Instrument (
+                Name VARCHAR NOT NULL,
+                SSN INTEGER NOT NULL,
+                AddressID INTEGER NOT NULL,
+                CONSTRAINT name PRIMARY KEY (Name, SSN, AddressID)
+);
+
+
+ALTER TABLE Notown.Musician_Instrument ADD CONSTRAINT instrument_musician_instrument_fk
+FOREIGN KEY (Name)
+REFERENCES Notown.Instrument (Name)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Instrument_Song ADD CONSTRAINT instrument_song_instrument_fk
+FOREIGN KEY (Name)
+REFERENCES Notown.Instrument (Name)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Musician ADD CONSTRAINT address_musician_fk
+FOREIGN KEY (AddressID)
+REFERENCES Notown.Address (AddressID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Musician_Instrument ADD CONSTRAINT musician_musician_instrument_fk
+FOREIGN KEY (SSN, AddressID)
+REFERENCES Notown.Musician (SSN, AddressID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Song ADD CONSTRAINT musician_song_fk
+FOREIGN KEY (SSN, AddressID)
+REFERENCES Notown.Musician (SSN, AddressID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Song_Musician ADD CONSTRAINT musician_song_musician_fk
+FOREIGN KEY (SSN, AddressID)
+REFERENCES Notown.Musician (SSN, AddressID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Album ADD CONSTRAINT musician_album_fk
+FOREIGN KEY (SSN, AddressID)
+REFERENCES Notown.Musician (SSN, AddressID)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Song ADD CONSTRAINT album_song_fk
+FOREIGN KEY (AlbumID, AddressID, SSN, Title)
+REFERENCES Notown.Album (AlbumID, AddressID, SSN, Title)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Instrument_Song ADD CONSTRAINT song_song_instrument_fk
+FOREIGN KEY (Title)
+REFERENCES Notown.Song (Title)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE Notown.Song_Musician ADD CONSTRAINT song_song_musician_fk
+FOREIGN KEY (AddressID, Title, SSN)
+REFERENCES Notown.Song (AddressID, Title, SSN)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
